@@ -17,8 +17,77 @@ var connection = mysql.createConnection({
 
 connection.connect(function(err) {
     if (err) throw err;
-    // runSearch();
+    askFirstQuestion();
 });
+
+function askFirstQuestion() {
+    inquirer
+        .prompt({
+            name: "firstQuestion",
+            type: "list",
+            message: "What would you like to do?",
+            choices: [
+                "Add Department",
+                "Add Role",
+                "Add Employee",
+                "View Departments",
+                "View Roles",
+                "View Employees",
+                "Update Employee Role",
+                "exit"
+            ]
+        })
+        .then(function(answer) {
+            switch (answer.action) {
+                // case "Add Department":
+                //     addDepartment();
+                //     break;
+                // case "Add Role":
+                //     addRole();
+                //     break;
+                // case "Add Employee":
+                //     addEmployee();
+                //     break;
+                case "View Departments":
+                    viewOptions("department");
+                    break;
+                case "View Roles":
+                    viewOptions("role");
+                    break;
+                case "View Employees":
+                    viewOptions("employee");
+                    break;
+                    // case "Update Employee Role":
+                    //     updateEmployeeRole();
+                    //     break;
+                case "exit":
+                    connection.end();
+                    break;
+            }
+        });
+}
+
+function viewOptions(viewAnswer) {
+    const viewType = "SELECT * FROM " + viewAnswer;
+    connection.query(viewType, function(err, res) {
+        if (err) throw err;
+        if (viewAnswer === "department") {
+            for (var i = 0; i < res.length; i++) {
+                console.log("ID: " + res[i].id + " || Name: " + res[i].name);
+            }
+        } else if (viewAnswer === "role") {
+            for (var i = 0; i < res.length; i++) {
+                console.log("ID: " + res[i].id + " || Title: " + res[i].title + " || Salary: " + res[i].salary + " || Department ID: " + res[i].department_id);
+            }
+        } else {
+            for (var i = 0; i < res.length; i++) {
+                console.log("ID: " + res[i].id + " || First Name: " + res[i].first_name + " || Last Name: " + res[i].last_name + " || Role ID: " + res[i].role + " || Manager ID: " + res[i].manager_id);
+            }
+        }
+        askFirstQuestion();
+    });
+
+}
 
 // function runSearch() {
 //     inquirer
