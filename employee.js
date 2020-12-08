@@ -41,23 +41,72 @@ function askFirstQuestion() {
                 "exit"
             ]
         }, {
-            name: "addName",
+            name: "departmentName",
             type: "input",
-            message: "What is the name of what you'd like to add?",
+            message: "What is the name of the department you'd like to add?",
             when: function(answer) {
-                return !!answer.firstQuestion && (answer.firstQuestion === "Add Department" || answer.firstQuestion === "Add Role" || answer.firstQuestion === "Add Employee")
+                return !!answer.firstQuestion && (answer.firstQuestion === "Add Department")
+            }
+        }, {
+            name: "roleTitle",
+            type: "input",
+            message: "What is the title of the role you'd like to add?",
+            when: function(answer) {
+                return !!answer.firstQuestion && (answer.firstQuestion === "Add Role")
+            }
+        }, {
+            name: "roleSalary",
+            type: "input",
+            message: "What is the salary of the role you'd like to add?",
+            when: function(answer) {
+                return !!answer.firstQuestion && (answer.firstQuestion === "Add Role")
+            }
+        }, {
+            name: "roleDepartmentID",
+            type: "input",
+            message: "What is the department ID of the role you'd like to add?",
+            when: function(answer) {
+                return !!answer.firstQuestion && (answer.firstQuestion === "Add Role")
+            }
+        }, {
+            name: "firstName",
+            type: "input",
+            message: "What is the first name of the employee you'd like to add?",
+            when: function(answer) {
+                return !!answer.firstQuestion && (answer.firstQuestion === "Add Employee")
+            }
+        }, {
+            name: "lastName",
+            type: "input",
+            message: "What is the last name of the employee you'd like to add?",
+            when: function(answer) {
+                return !!answer.firstQuestion && (answer.firstQuestion === "Add Employee")
+            }
+        }, {
+            name: "employeeRoleID",
+            type: "input",
+            message: "What is the role ID of the employee you'd like to add?",
+            when: function(answer) {
+                return !!answer.firstQuestion && (answer.firstQuestion === "Add Employee")
+            }
+        }, {
+            name: "employeeManagerID",
+            type: "input",
+            message: "What is the manager ID of the employee you'd like to add?",
+            when: function(answer) {
+                return !!answer.firstQuestion && (answer.firstQuestion === "Add Employee")
             }
         }])
         .then(function(answer) {
             switch (answer.firstQuestion) {
                 case "Add Department":
-                    addOptions("department");
+                    addOptions("department", answer);
                     break;
                 case "Add Role":
-                    addOptions("role");
+                    addOptions("role", answer);
                     break;
                 case "Add Employee":
-                    addOptions("employee");
+                    addOptions("employee", answer);
                     break;
                 case "View Departments":
                     viewOptions("department");
@@ -101,32 +150,26 @@ function viewOptions(viewAnswer) {
 }
 
 //Function for if they want to add a department, role or employee
-function addOptions(addAnswer) {
+function addOptions(addAnswer, answer) {
     //Variable for parameters needs to switch based on table
     if (addAnswer === "department") {
-        const tableParams = "(name)"
+        var tableAnswers = { name: answer.departmentName };
     } else if (addAnswer === "role") {
-        const tableParams = "(title, salary, department_id)"
+        var tableAnswers = { title: answer.roleTitle, salary: answer.roleSalary, department_id: answer.roleDepartmentID }
     } else {
-        const tableParams = "(first_name, last_name, role_id, manager_id)"
+        var tableAnswers = { first_name: answer.firstName, last_name: answer.lastName, role_id: answer.employeeRoleID, manager_id: answer.employeeManagerID }
     }
-
-    const addType = "INSERT INTO " + addAnswer + " " + tableParams + " SET ?";
-
-    connection.query(addType, function(err, res) {
+    // Variable for what we're inserting depends on previous answer
+    const addType = "INSERT INTO " + addAnswer + " SET ?";
+    //Use variablwes to make connection 
+    connection.query(addType, tableAnswers, function(err, res) {
         if (err) throw err;
-        if (viewAnswer === "department") {
-            for (var i = 0; i < res.length; i++) {
-                console.log("ID: " + res[i].id + " || Name: " + res[i].name);
-            }
-        } else if (viewAnswer === "role") {
-            for (var i = 0; i < res.length; i++) {
-                console.log("ID: " + res[i].id + " || Title: " + res[i].title + " || Salary: " + res[i].salary + " || Department ID: " + res[i].department_id);
-            }
+        if (addAnswer === "department") {
+            console.log(res.affectedRows + " " + addAnswer + " added! \n");
+        } else if (addAnswer === "role") {
+            console.log(res.affectedRows + " " + addAnswer + "added! \n");
         } else {
-            for (var i = 0; i < res.length; i++) {
-                console.log("ID: " + res[i].id + " || Name: " + res[i].first_name + " " + res[i].last_name + " || Role ID: " + res[i].role_id + " || Manager ID: " + res[i].manager_id);
-            }
+            console.log(res.affectedRows + " " + addAnswer + "added! \n");
         }
         askFirstQuestion();
     });
