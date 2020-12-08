@@ -1,6 +1,8 @@
+//All requires
 var mysql = require("mysql");
 var inquirer = require("inquirer");
 
+//Set up connection
 var connection = mysql.createConnection({
     host: "localhost",
 
@@ -12,17 +14,19 @@ var connection = mysql.createConnection({
 
     // Your password
     password: "Bootcamp2020",
-    database: "top_songsDB"
+    database: "employee_DB"
 });
 
+//Prompt first question when connected
 connection.connect(function(err) {
     if (err) throw err;
     askFirstQuestion();
 });
 
+//First Question to decide between inital actions
 function askFirstQuestion() {
     inquirer
-        .prompt({
+        .prompt([{
             name: "firstQuestion",
             type: "list",
             message: "What would you like to do?",
@@ -33,21 +37,28 @@ function askFirstQuestion() {
                 "View Departments",
                 "View Roles",
                 "View Employees",
-                "Update Employee Role",
+                // "Update Employee Role",
                 "exit"
             ]
-        })
+        }, {
+            name: "addName",
+            type: "input",
+            message: "What is the name of what you'd like to add?",
+            when: function(answer) {
+                return !!answer.firstQuestion && (answer.firstQuestion === "Add Department" || answer.firstQuestion === "Add Role" || answer.firstQuestion === "Add Employee")
+            }
+        }])
         .then(function(answer) {
-            switch (answer.action) {
-                // case "Add Department":
-                //     addDepartment();
-                //     break;
-                // case "Add Role":
-                //     addRole();
-                //     break;
-                // case "Add Employee":
-                //     addEmployee();
-                //     break;
+            switch (answer.firstQuestion) {
+                case "Add Department":
+                    addOptions("department");
+                    break;
+                case "Add Role":
+                    addOptions("role");
+                    break;
+                case "Add Employee":
+                    addOptions("employee");
+                    break;
                 case "View Departments":
                     viewOptions("department");
                     break;
@@ -67,6 +78,7 @@ function askFirstQuestion() {
         });
 }
 
+//Function for if they want to view a department, role or employee
 function viewOptions(viewAnswer) {
     const viewType = "SELECT * FROM " + viewAnswer;
     connection.query(viewType, function(err, res) {
@@ -81,12 +93,43 @@ function viewOptions(viewAnswer) {
             }
         } else {
             for (var i = 0; i < res.length; i++) {
-                console.log("ID: " + res[i].id + " || First Name: " + res[i].first_name + " || Last Name: " + res[i].last_name + " || Role ID: " + res[i].role + " || Manager ID: " + res[i].manager_id);
+                console.log("ID: " + res[i].id + " || Name: " + res[i].first_name + " " + res[i].last_name + " || Role ID: " + res[i].role_id + " || Manager ID: " + res[i].manager_id);
             }
         }
         askFirstQuestion();
     });
+}
 
+//Function for if they want to add a department, role or employee
+function addOptions(addAnswer) {
+    //Variable for parameters needs to switch based on table
+    if (addAnswer === "department") {
+        const tableParams = "(name)"
+    } else if (addAnswer === "role") {
+        const tableParams = "(title, salary, department_id)"
+    } else {
+        const tableParams = "(first_name, last_name, role_id, manager_id)"
+    }
+
+    const addType = "INSERT INTO " + addAnswer + " " + tableParams + " SET ?";
+
+    connection.query(addType, function(err, res) {
+        if (err) throw err;
+        if (viewAnswer === "department") {
+            for (var i = 0; i < res.length; i++) {
+                console.log("ID: " + res[i].id + " || Name: " + res[i].name);
+            }
+        } else if (viewAnswer === "role") {
+            for (var i = 0; i < res.length; i++) {
+                console.log("ID: " + res[i].id + " || Title: " + res[i].title + " || Salary: " + res[i].salary + " || Department ID: " + res[i].department_id);
+            }
+        } else {
+            for (var i = 0; i < res.length; i++) {
+                console.log("ID: " + res[i].id + " || Name: " + res[i].first_name + " " + res[i].last_name + " || Role ID: " + res[i].role_id + " || Manager ID: " + res[i].manager_id);
+            }
+        }
+        askFirstQuestion();
+    });
 }
 
 // function runSearch() {
