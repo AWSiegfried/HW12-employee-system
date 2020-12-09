@@ -37,7 +37,7 @@ function askFirstQuestion() {
                 "View Departments",
                 "View Roles",
                 "View Employees",
-                // "Update Employee Role",
+                "Update Employee Role",
                 "exit"
             ]
         }, {
@@ -96,6 +96,20 @@ function askFirstQuestion() {
             when: function(answer) {
                 return !!answer.firstQuestion && (answer.firstQuestion === "Add Employee")
             }
+        }, {
+            name: "updateEmployeeID",
+            type: "input",
+            message: "What is the employee ID of the employee you'd like to update?",
+            when: function(answer) {
+                return !!answer.firstQuestion && (answer.firstQuestion === "Update Employee Role")
+            }
+        }, {
+            name: "updateEmployeeRole",
+            type: "input",
+            message: "What is the new role ID of the employee",
+            when: function(answer) {
+                return !!answer.firstQuestion && (answer.firstQuestion === "Update Employee Role")
+            }
         }])
         .then(function(answer) {
             switch (answer.firstQuestion) {
@@ -117,9 +131,9 @@ function askFirstQuestion() {
                 case "View Employees":
                     viewOptions("employee");
                     break;
-                    // case "Update Employee Role":
-                    //     updateEmployeeRole();
-                    //     break;
+                case "Update Employee Role":
+                    updateEmployeeRole(answer);
+                    break;
                 case "exit":
                     connection.end();
                     break;
@@ -173,6 +187,29 @@ function addOptions(addAnswer, answer) {
         }
         askFirstQuestion();
     });
+}
+
+function updateEmployeeRole(answer) {
+    console.log("Updating the employee's role...\n");
+    var query = connection.query(
+        "UPDATE employee SET ? WHERE ?", [{
+                role_id: answer.updateEmployeeRole
+            },
+            {
+                id: answer.updateEmployeeID
+            }
+        ],
+        function(err, res) {
+            if (err) throw err;
+            console.log(res.affectedRows + " songs updated!\n");
+            // Call deleteSongs AFTER the UPDATE completes
+        }
+    );
+    //Show that the change has been made
+    viewOptions("employee");
+    // logs the actual query being run
+    console.log(query.sql);
+    askFirstQuestion();
 }
 
 // function runSearch() {
