@@ -18,7 +18,7 @@ The purpose of this assignment was to create a Content Management System for a p
 ## **Installation**
 1. Clone the repo
 ```sh
-https://github.com/AWSiegfried/HW11-express-note-taker.git
+https://github.com/AWSiegfried/HW12-employee-system.git
 ```
 
 2. Install NPM packages
