@@ -27,7 +27,7 @@ npm install
 ```
 
 ## **Demonstration Video**
-![](demo.gif)
+![gif](demo.gif)
 
 
 ## **Contributing**
