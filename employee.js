@@ -123,13 +123,13 @@ function askFirstQuestion() {
                     addOptions("employee", answer);
                     break;
                 case "View Departments":
-                    viewOptions("department");
+                    viewOptions("department", answer);
                     break;
                 case "View Roles":
-                    viewOptions("role");
+                    viewOptions("role", answer);
                     break;
                 case "View Employees":
-                    viewOptions("employee");
+                    viewOptions("employee", answer);
                     break;
                 case "Update Employee Role":
                     updateEmployeeRole(answer);
@@ -158,6 +158,22 @@ function viewOptions(viewAnswer) {
     });
 }
 
+//Exact same code as before but not including running the first question again as I just want to read certain things before asking a question. 
+function viewOptionsTwo(viewAnswer) {
+    let viewType = "";
+    if (viewAnswer === "role") {
+        viewType = `SELECT role.id, role.title, role.salary, department.name AS department, role.department_id AS department_id FROM ${viewAnswer} LEFT JOIN department ON ${viewAnswer}.department_id = department.id`;
+    } else if (viewAnswer === "employee") {
+        viewType = `SELECT employee.id, employee.first_name, employee.last_name, role.title, role.salary, department.name AS department, CONCAT(manager.first_name, " ", manager.last_name) AS manager FROM ${viewAnswer} LEFT JOIN role ON employee.role_id = role.id LEFT JOIN department ON role.department_id = department.id LEFT JOIN employee manager ON manager.id = employee.manager_id`;
+    } else {
+        viewType = 'SELECT * FROM department'
+    }
+    connection.query(viewType, function(err, res) {
+        if (err) throw err;
+        console.table(res)
+    });
+}
+
 //Function for if they want to add a department, role or employee
 function addOptions(addAnswer, answer) {
     let tableAnswers = {}
@@ -175,7 +191,7 @@ function addOptions(addAnswer, answer) {
     connection.query(addType, tableAnswers, function(err, res) {
         if (err) throw err;
         console.log(res.affectedRows + " " + addAnswer + "added! \n");
-        askFirstQuestion();
+        viewOptions(addAnswer);
     });
 }
 
@@ -197,6 +213,4 @@ function updateEmployeeRole(answer) {
     );
     //Show that the change has been made
     viewOptions("employee");
-    // logs the actual query being run
-    askFirstQuestion();
 }
